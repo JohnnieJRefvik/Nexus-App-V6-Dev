@@ -1,2 +1,0 @@
--- Empty bootstrap migration for V6 DEV. Real schema will follow in PR #2.
--- No DDL in this file by design.
