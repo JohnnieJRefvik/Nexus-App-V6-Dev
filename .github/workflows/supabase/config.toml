@@ -1,7 +1,0 @@
-project_id = "inmrfipyeigxtfsemabt"
-
-[db]
-major_version = 15
-
-[api]
-enabled = true
