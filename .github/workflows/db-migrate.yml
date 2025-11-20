@@ -1,12 +1,3 @@
-name: DB Migrations (DEV)
-
-on:
-  pull_request:
-    paths: ["supabase/migrations/**"]
-  push:
-    branches: ["main"]
-    paths: ["supabase/migrations/**"]
-
 jobs:
   migrate-dev:
     runs-on: ubuntu-latest
@@ -15,12 +6,24 @@ jobs:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL_DEV }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+
+      # Force IPv4: resolve A record and export PGHOSTADDR for libpq
+      - name: Force IPv4 for Postgres
+        shell: bash
+        run: |
+          H="db.inmrfipyeigxtfsemabt.supabase.co"
+          IP=$(getent ahostsv4 "$H" | awk 'NR==1 {print $1}')
+          echo "PGHOSTADDR=$IP" >> "$GITHUB_ENV"
+          echo "Using IPv4: $IP"
+
       - name: Dry-run on PR (no changes applied)
         if: github.event_name == 'pull_request'
         run: supabase db diff --linked --use-migra --dry-run || true
+
       - name: Apply migrations to DEV on main
         if: github.event_name == 'push'
         run: supabase db push --db-url "$SUPABASE_DB_URL"
